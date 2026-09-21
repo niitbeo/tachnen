@@ -1,0 +1,19 @@
+# Model của Leien — KHÔNG đưa lên. Xem mục "Model" trong README.
+models/
+
+# Python nhúng + thư viện bên thứ ba (150 MB). Cài bằng pip thay vì commit.
+python/
+
+# Ảnh kết quả, ảnh thử — có mặt người thật
+ket_qua_*
+_preview.jpg
+*_tachnen.png
+*_mask.png
+tachnen/
+
+# Rác khi chạy
+__pycache__/
+*.pyc
+_may.log
+_may.err
+_thu/

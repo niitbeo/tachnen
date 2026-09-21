@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tách nền hàng loạt</title>
+<style>
+  :root{
+    --nen:#0f1115; --the:#171a21; --vien:#262b36; --chu:#e6e8ec; --mo:#9aa3b2;
+    --nhan:#4c8dff; --nhan-dam:#3a78e6; --tot:#3ecf8e; --xau:#ff6b6b; --rem:#0b0d11;
+  }
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]){
+      --nen:#f4f6fa; --the:#fff; --vien:#dfe4ec; --chu:#16191f; --mo:#5f6877;
+      --rem:#e8ecf3;
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--nen);color:var(--chu);
+       font:15px/1.5 "Segoe UI",system-ui,-apple-system,sans-serif}
+  .boc{max-width:1060px;margin:0 auto;padding:22px 16px 60px}
+  h1{font-size:21px;margin:0 0 4px;font-weight:650}
+  .phu{color:var(--mo);font-size:13.5px;margin:0 0 20px}
+  .the{background:var(--the);border:1px solid var(--vien);border-radius:12px;
+       padding:16px 18px;margin-bottom:14px}
+  .the h2{font-size:13px;letter-spacing:.06em;text-transform:uppercase;
+          color:var(--mo);margin:0 0 12px;font-weight:600}
+  button{font:inherit;border:1px solid var(--vien);background:var(--rem);color:var(--chu);
+         padding:8px 14px;border-radius:8px;cursor:pointer}
+  button:hover:not(:disabled){border-color:var(--nhan)}
+  button:disabled{opacity:.45;cursor:default}
+  button.chinh{background:var(--nhan);border-color:var(--nhan);color:#fff;font-weight:600;
+               padding:11px 26px;font-size:15.5px}
+  button.chinh:hover:not(:disabled){background:var(--nhan-dam)}
+  input[type=text],select{font:inherit;background:var(--rem);color:var(--chu);
+    border:1px solid var(--vien);border-radius:8px;padding:8px 10px;width:100%}
+  label{display:block;font-size:13px;color:var(--mo);margin-bottom:5px}
+  .hang{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .luoi{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:14px}
+  .duong{font-family:Consolas,ui-monospace,monospace;font-size:12.5px;color:var(--mo);
+         word-break:break-all}
+  /* chọn thư mục */
+  #hop-tm{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9;
+          align-items:center;justify-content:center;padding:16px}
+  #hop-tm.hien{display:flex}
+  .hop{background:var(--the);border:1px solid var(--vien);border-radius:12px;
+       width:min(640px,100%);max-height:80vh;display:flex;flex-direction:column}
+  .hop-dau{padding:14px 18px;border-bottom:1px solid var(--vien)}
+  .hop-than{overflow:auto;padding:6px 0;flex:1}
+  .hop-chan{padding:12px 18px;border-top:1px solid var(--vien);
+            display:flex;gap:10px;justify-content:flex-end;align-items:center}
+  .muc{padding:8px 18px;cursor:pointer;display:flex;justify-content:space-between;gap:10px}
+  .muc:hover{background:var(--rem)}
+  .muc .dem{color:var(--tot);font-size:12.5px;white-space:nowrap}
+  /* tiến trình */
+  .thanh{height:10px;background:var(--rem);border-radius:99px;overflow:hidden;
+         border:1px solid var(--vien)}
+  .thanh i{display:block;height:100%;width:0;background:var(--nhan);
+           transition:width .25s ease}
+  .thanh.xong i{background:var(--tot)}
+  #nhatky{background:var(--rem);border:1px solid var(--vien);border-radius:8px;
+          padding:10px 12px;height:180px;overflow:auto;white-space:pre-wrap;
+          font-family:Consolas,ui-monospace,monospace;font-size:12.5px;line-height:1.55}
+  .anhluoi{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+  .anhluoi img{width:100%;height:150px;object-fit:contain;background:var(--rem);
+               border:1px solid var(--vien);border-radius:8px}
+  .an{display:none}
+  .canh{color:var(--xau);font-size:13.5px}
+</style>
+</head>
+<body>
+<div class="boc">
+  <h1>Tách nền hàng loạt</h1>
+  <p class="phu">Chạy tại chỗ trên máy bạn — ảnh không gửi đi đâu cả.</p>
+
+  <!-- NGUỒN -->
+  <div class="the">
+    <h2>1 · Ảnh cần tách</h2>
+    <div class="hang">
+      <button id="nut-chon">Chọn thư mục…</button>
+      <span id="tt-tm" class="duong">chưa chọn thư mục</span>
+    </div>
+    <div class="hang" style="margin-top:10px">
+      <label style="margin:0;display:flex;gap:7px;align-items:center;cursor:pointer">
+        <input type="checkbox" id="sau" checked> gồm cả thư mục con
+      </label>
+      <span id="so-anh" style="color:var(--tot);font-weight:600"></span>
+    </div>
+  </div>
+
+  <!-- TUỲ CHỌN -->
+  <div class="the">
+    <h2>2 · Tuỳ chọn</h2>
+    <div class="luoi">
+      <div>
+        <label>Nền thay thế</label>
+        <select id="nen">
+          <option value="trong">Trong suốt (PNG)</option>
+          <option value="trang">Trắng</option>
+          <option value="den">Đen</option>
+          <option value="xanh">Xanh ảnh thẻ</option>
+          <option value="do">Đỏ</option>
+          <option value="xam">Xám</option>
+          <option value="__mau__">Màu tự chọn…</option>
+        </select>
+        <div id="hop-mau" class="an" style="margin-top:8px">
+          <input type="color" id="mau" value="#2f7fd8" style="width:100%;height:38px;
+                 background:var(--rem);border:1px solid var(--vien);border-radius:8px;cursor:pointer">
+        </div>
+      </div>
+      <div>
+        <label>Chất lượng</label>
+        <select id="cl">
+          <option value="0">Tinh biên — đẹp nhất, chậm nhất</option>
+          <option value="3000">Tinh biên, hạ cỡ 3000</option>
+          <option value="2500" selected>Tinh biên, hạ cỡ 2500 — khuyên dùng</option>
+          <option value="1800">Tinh biên, hạ cỡ 1800 — nhanh</option>
+          <option value="-1">Thô — nhanh nhất, biên tóc xấu</option>
+        </select>
+      </div>
+      <div>
+        <label>Lưu kết quả vào</label>
+        <div class="hang" style="flex-wrap:nowrap">
+          <input type="text" id="ra" placeholder="mặc định: thư mục &quot;tachnen&quot; cạnh ảnh gốc">
+          <button id="nut-ra" style="white-space:nowrap">Chọn…</button>
+        </div>
+        <label style="margin:9px 0 0;display:flex;gap:7px;align-items:center;cursor:pointer">
+          <input type="checkbox" id="mask"> lưu kèm mặt nạ
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHẠY -->
+  <div class="the">
+    <h2>3 · Xử lý</h2>
+    <div class="hang" style="margin-bottom:14px">
+      <button class="chinh" id="nut-chay" disabled>Bắt đầu tách nền</button>
+      <button id="nut-dung" disabled>Dừng</button>
+      <button id="nut-mo" disabled>Mở thư mục kết quả</button>
+      <span id="canh" class="canh"></span>
+    </div>
+    <div class="thanh" id="thanh"><i id="thanh-in"></i></div>
+    <div class="hang" style="justify-content:space-between;margin-top:8px;font-size:13.5px">
+      <span id="tt">Sẵn sàng.</span><span id="pt" style="color:var(--mo)"></span>
+    </div>
+    <div id="nhatky" style="margin-top:12px"></div>
+  </div>
+
+  <!-- KẾT QUẢ -->
+  <div class="the an" id="the-kq">
+    <h2>Kết quả</h2>
+    <div class="anhluoi" id="kq"></div>
+  </div>
+</div>
+
+<!-- hộp chọn thư mục -->
+<div id="hop-tm">
+  <div class="hop">
+    <div class="hop-dau">
+      <div style="font-weight:600;margin-bottom:4px" id="hop-tieu">Chọn thư mục</div>
+      <div class="duong" id="hop-duong">Máy tính</div>
+    </div>
+    <div class="hop-than" id="hop-ds"></div>
+    <div class="hop-chan">
+      <span id="hop-dem" style="color:var(--tot);font-size:13px;margin-right:auto"></span>
+      <button id="hop-len">⬆ Lên trên</button>
+      <button id="hop-huy">Huỷ</button>
+      <button class="chinh" id="hop-ok" style="padding:8px 18px;font-size:15px">Chọn thư mục này</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const MA = "__MA__";
+const api = (d, o) => fetch(d + (d.includes("?") ? "&" : "?") + "ma=" + MA, o);
+const $ = id => document.getElementById(id);
+
+let thuMuc = "", dichRa = "", dangChon = "nguon", chay = false, timer = null;
+
+/* ---------- chọn thư mục ---------- */
+let hienTai = "";
+async function moHop(kieu){
+  dangChon = kieu;
+  $("hop-tieu").textContent = kieu === "nguon" ? "Chọn thư mục chứa ảnh" : "Chọn thư mục lưu kết quả";
+  $("hop-tm").classList.add("hien");
+  await veHop(kieu === "nguon" ? thuMuc : dichRa);
+}
+async function veHop(duong){
+  let r;
+  try{
+    r = await (await api("/api/thu-muc?duong=" + encodeURIComponent(duong || ""))).json();
+  }catch(e){ return; }
+  if(r.loi){ r = await (await api("/api/thu-muc?duong=")).json(); }
+  hienTai = r.duong || "";
+  $("hop-duong").textContent = hienTai || "Máy tính";
+  $("hop-len").disabled = !hienTai;
+  $("hop-ok").disabled = !hienTai;
+  $("hop-dem").textContent = hienTai && r.soAnh ? r.soAnh + " ảnh ngay trong thư mục này" : "";
+  const ds = $("hop-ds");
+  ds.innerHTML = "";
+  if(!r.thuMuc.length){
+    ds.innerHTML = '<div class="muc" style="cursor:default;color:var(--mo)">(không có thư mục con)</div>';
+  }
+  for(const t of r.thuMuc){
+    const d = document.createElement("div");
+    d.className = "muc";
+    const ten = t.replace(/\\$/, "").split("\\").pop() || t;
+    d.innerHTML = "<span>📁 " + ten + "</span>";
+    d.onclick = () => veHop(t);
+    ds.appendChild(d);
+  }
+}
+$("hop-len").onclick = async () => {
+  const r = await (await api("/api/thu-muc?duong=" + encodeURIComponent(hienTai))).json();
+  veHop(r.cha || "");
+};
+$("hop-huy").onclick = () => $("hop-tm").classList.remove("hien");
+$("hop-ok").onclick = async () => {
+  $("hop-tm").classList.remove("hien");
+  if(dangChon === "nguon"){
+    thuMuc = hienTai;
+    $("tt-tm").textContent = thuMuc;
+    await demAnh();
+  }else{
+    dichRa = hienTai;
+    $("ra").value = dichRa;
+  }
+};
+/* Ưu tiên hộp thoại thật của Windows; không mở được thì dùng bộ duyệt trong trang. */
+async function chonThuMuc(kieu){
+  const nut = kieu === "nguon" ? $("nut-chon") : $("nut-ra");
+  const chu = nut.textContent;
+  nut.disabled = true; nut.textContent = "Đang mở…";
+  let r = null;
+  try{
+    r = await (await api("/api/hop-thoai", {
+      method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        tieuDe: kieu === "nguon" ? "Chọn thư mục chứa ảnh" : "Chọn thư mục lưu kết quả",
+        batDau: kieu === "nguon" ? thuMuc : ($("ra").value.trim() || thuMuc),
+        sau: $("sau").checked
+      })
+    })).json();
+  }catch(e){ r = null; }
+  nut.disabled = false; nut.textContent = chu;
+
+  if(r && r.huy) return;                    // người dùng bấm Huỷ
+  if(!r || r.khongCo || r.loi){ moHop(kieu); return; }   // lùi về bộ duyệt trong trang
+  if(kieu === "nguon"){
+    thuMuc = r.duong;
+    $("tt-tm").textContent = thuMuc;
+    $("so-anh").textContent = r.so ? "tìm thấy " + r.so + " ảnh" : "không có ảnh nào";
+    $("nut-chay").disabled = !r.so || chay;
+  }else{
+    dichRa = r.duong;
+    $("ra").value = dichRa;
+  }
+}
+$("nut-chon").onclick = () => chonThuMuc("nguon");
+$("nut-ra").onclick = () => chonThuMuc("dich");
+
+async function demAnh(){
+  if(!thuMuc){ return; }
+  $("so-anh").textContent = "đang đếm…";
+  const r = await (await api("/api/dem?duong=" + encodeURIComponent(thuMuc)
+                   + "&sau=" + ($("sau").checked ? 1 : 0))).json();
+  $("so-anh").textContent = r.so ? "tìm thấy " + r.so + " ảnh" : "không có ảnh nào";
+  $("nut-chay").disabled = !r.so || chay;
+}
+$("sau").onchange = demAnh;
+
+/* ---------- tuỳ chọn ---------- */
+$("nen").onchange = () => $("hop-mau").classList.toggle("an", $("nen").value !== "__mau__");
+$("ra").oninput = () => { dichRa = $("ra").value.trim(); };
+
+/* ---------- chạy ---------- */
+$("nut-chay").onclick = async () => {
+  $("canh").textContent = "";
+  const cl = parseInt($("cl").value, 10);
+  const than = {
+    thuMuc: thuMuc,
+    sau: $("sau").checked,
+    nen: $("nen").value === "__mau__" ? $("mau").value : $("nen").value,
+    nhanh: cl === -1,
+    maxsize: cl > 0 ? cl : 0,
+    mask: $("mask").checked,
+    thuMucRa: $("ra").value.trim()
+  };
+  const r = await (await api("/api/bat-dau", {
+    method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(than)
+  })).json();
+  if(r.loi){ $("canh").textContent = r.loi; return; }
+  chay = true;
+  $("nut-chay").disabled = true; $("nut-dung").disabled = false; $("nut-mo").disabled = true;
+  $("thanh").classList.remove("xong");
+  $("the-kq").classList.add("an"); $("kq").innerHTML = "";
+  theoDoi();
+};
+$("nut-dung").onclick = async () => {
+  $("nut-dung").disabled = true;
+  $("tt").textContent = "Đang dừng sau khi xong ảnh hiện tại…";
+  await api("/api/dung", {method: "POST"});
+};
+$("nut-mo").onclick = () => api("/api/mo", {
+  method: "POST", headers: {"Content-Type": "application/json"},
+  body: JSON.stringify({duong: $("nut-mo").dataset.duong || ""})
+});
+
+function gio(g){
+  g = Math.round(g);
+  if(g < 60) return g + " giây";
+  return Math.floor(g/60) + " phút " + String(g%60).padStart(2,"0") + " giây";
+}
+function theoDoi(){
+  clearInterval(timer);
+  timer = setInterval(async () => {
+    let s;
+    try{ s = await (await api("/api/tien-trinh")).json(); }catch(e){ return; }
+    const lam = s.xong + s.loi;
+    const pt = s.tong ? lam / s.tong * 100 : 0;
+    $("thanh-in").style.width = pt + "%";
+    $("pt").textContent = s.tong ? lam + "/" + s.tong + " · " + pt.toFixed(0) + "%" : "";
+    $("nhatky").textContent = s.nhatKy.join("\n");
+    $("nhatky").scrollTop = $("nhatky").scrollHeight;
+    if(s.dangChay){
+      $("tt").textContent = "Đang xử lý: " + s.hienTai
+        + (s.con > 1 ? "  ·  còn khoảng " + gio(s.con) : "");
+    }else if(s.daXong){
+      clearInterval(timer); chay = false;
+      $("thanh").classList.add("xong");
+      $("nut-chay").disabled = false; $("nut-dung").disabled = true;
+      let t = "Xong " + s.xong + " ảnh trong " + gio(s.giay);
+      if(s.loi) t += "  ·  " + s.loi + " ảnh lỗi";
+      $("tt").textContent = t;
+      if(s.thuMucRa){
+        $("nut-mo").disabled = false;
+        $("nut-mo").dataset.duong = s.thuMucRa;
+      }
+      if(s.ketQua.length){
+        $("the-kq").classList.remove("an");
+        $("kq").innerHTML = s.ketQua.map(p =>
+          '<img loading="lazy" title="' + p.replace(/"/g,"&quot;") + '" src="/api/anh?ma=' + MA
+          + '&duong=' + encodeURIComponent(p) + '&cao=300">').join("");
+      }
+    }
+  }, 350);
+}
+</script>
+</body>
+</html>

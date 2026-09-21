@@ -1,0 +1,5 @@
+# Tách nền chỉ cần 3 thư viện này.
+# Không cần torch (494 MB) — xem mục "Vì sao bỏ được torch" trong README.
+MNN
+opencv-python
+numpy
