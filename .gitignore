@@ -1,7 +1,7 @@
-# Model của Leien — KHÔNG đưa lên. Repo này công khai.
-# Hai tệp đó có bản quyền, được bảo vệ bằng mã hoá và giấy phép riêng.
-# Người dùng tự rút từ bản cài của họ bằng: python lay_model.py
-models/
+# Model files tracked by Git LFS (*.mnn, *.onnx)
+# models/  ← đã bỏ ignore, đẩy lên qua LFS
+models/.cache/
+models/huggingface/
 
 # Python nhúng + thư viện bên thứ ba (150 MB). Cài bằng pip thay vì commit.
 python/
