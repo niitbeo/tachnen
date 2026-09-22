@@ -1,4 +1,6 @@
-# Model của Leien — KHÔNG đưa lên. Xem mục "Model" trong README.
+# Model của Leien — KHÔNG đưa lên. Repo này công khai.
+# Hai tệp đó có bản quyền, được bảo vệ bằng mã hoá và giấy phép riêng.
+# Người dùng tự rút từ bản cài của họ bằng: python lay_model.py
 models/
 
 # Python nhúng + thư viện bên thứ ba (150 MB). Cài bằng pip thay vì commit.
@@ -12,8 +14,13 @@ _preview.jpg
 tachnen/
 
 # Rác khi chạy
+_commit.txt
 __pycache__/
 *.pyc
 _may.log
 _may.err
 _thu/
+
+# Frontend build & deps
+frontend/node_modules/
+frontend/dist/

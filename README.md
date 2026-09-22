@@ -5,11 +5,11 @@ dòng lệnh, và có bản kéo thả.
 
 > ### ⚠️ Repo này KHÔNG kèm model
 >
-> Hai tệp model là **tài sản của Leien Photo AI**, có bản quyền và được bảo vệ bằng hệ
-> thống giấy phép riêng. Repo này chỉ có **mã nguồn**.
+> Hai tệp model thuộc **bản quyền của Leien Photo AI**, được bảo vệ bằng mã hoá, chữ ký và
+> hệ thống giấy phép riêng. Repo này chỉ có **mã nguồn**.
 >
-> Muốn chạy, bạn phải tự lấy model **từ bản Leien Photo AI mà chính bạn có giấy phép**.
-> Chạy `python lay_model.py` là xong — nó tự dò và rút ra `models/`.
+> Muốn chạy, bạn phải có bản Leien Photo AI **của chính bạn, có giấy phép hợp lệ**. Chạy
+> `python lay_model.py` là xong — nó tự dò và rút model ra `models/`.
 >
 > Đừng đăng lại hai tệp model đó lên bất cứ đâu công khai.
 
@@ -22,16 +22,16 @@ pip install -r requirements.txt
 python lay_model.py
 ```
 
-`lay_model.py` tự dò bộ cài Leien trên máy bạn và rút đúng 2 tệp model ra `models/`. Không
-tự tìm được thì chỉ đường cho nó:
+`lay_model.py` tự dò bộ cài Leien trên máy và rút đúng 2 tệp model ra `models/`. Không tự
+tìm được thì chỉ đường cho nó:
 
 ```bash
 python lay_model.py D:\ai
 python lay_model.py D:\ai\1-leien-engine-env.zip
 ```
 
-Nó cũng đọc được thư mục `leien_env/` đã giải nén sẵn. Model rút ra **giống hệt từng byte**
-với bản trong bộ cài.
+Nó đọc được cả tệp zip lẫn thư mục `leien_env/` đã giải nén. Model rút ra **giống hệt từng
+byte** với bản trong bộ cài.
 
 ## Cách dùng
 
@@ -119,8 +119,6 @@ pip install MNN opencv-python numpy
 **Không cần `torch`** (494 MB) và **không cần `onnxruntime`**. Xem mục dưới.
 
 ### Model — 2 cái, 17,7 MB
-
-**Không có trong repo này.** Tự lấy từ bản Leien Photo AI mà bạn có giấy phép.
 
 | tệp | cỡ | việc |
 |---|---|---|
